@@ -22,12 +22,13 @@ public class WNALL {
                 synchronized (lock) {
                     try {
                         lock.wait();
+                        System.out.println("A");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (a = true) {
                         lock.notify();
-                        System.out.println("A");
+
                         boolean a = false;
                         boolean b = true;
                         boolean c = false;
@@ -48,13 +49,14 @@ public class WNALL {
                 synchronized (lock) {
                     try {
                         lock.wait();
+                        System.out.println("B");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (b = true) {
 
                         lock.notify();
-                        System.out.println("B");
+
                         boolean a = false;
                         boolean b = false;
                         boolean c = true;
@@ -77,10 +79,11 @@ public class WNALL {
                 synchronized (lock) {
                     try {
                         lock.wait();
+                        System.out.println("C");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("C");
+
                     if (c = true) {
                         lock.notify();
                         boolean a = true;
