@@ -1,40 +1,42 @@
 package com.company;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public class WNALL {
-    boolean a = true;
-    boolean b = false;
-    boolean c = false;
-    int x=0;
-
-    Object lock = new Object();
 
 
-    public void C() throws InterruptedException {
-        while(x<5) {
+    public static void main(String[] args) throws InterruptedException {
+        Object lock = new Object();
+        List<String> list = new CopyOnWriteArrayList<>();
+
             Thread t1 = new Thread(() -> {
 
-                    try {
-                        Thread.sleep(1000);
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+                try {
+                    Thread.sleep(1000);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 synchronized (lock) {
                     try {
                         lock.wait();
-                        System.out.println("A");
+
+
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (a = true) {
+                    if (list.get(1)==null) {
                         lock.notify();
-
-                        boolean a = false;
-                        boolean b = true;
-                        boolean c = false;
                     }
-
+                    list.add("A");
                 }
+
+
+
 
 
             });
@@ -42,33 +44,29 @@ public class WNALL {
 
                     try {
                         Thread.sleep(1000);
-
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                 synchronized (lock) {
                     try {
                         lock.wait();
-                        System.out.println("B");
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (b = true) {
-
+                    if (list.get(1)=="A") {
                         lock.notify();
-
-                        boolean a = false;
-                        boolean b = false;
-                        boolean c = true;
                     }
+                    list.add("B");
+
 
                 }
 
 
             });
+
             Thread t3 = new Thread(() -> {
-
-
 
                     try {
                         Thread.sleep(1000);
@@ -76,26 +74,117 @@ public class WNALL {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                synchronized (lock) {
-                    try {
-                        lock.wait();
-                        System.out.println("C");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
 
-                    if (c = true) {
+                synchronized (lock) {
+                try {
+                    lock.wait();
+
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                    if (list.get(2)=="B") {
                         lock.notify();
-                        boolean a = true;
-                        boolean b = false;
-                        boolean c = false;
                     }
+                    list.add("C");
+                    System.out.println(list);
+
+
 
                 }
 
 
             });
-            x++;
+        Thread t4 = new Thread(() -> {
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+        synchronized (lock) {
+            try {
+
+
+                lock.wait();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (list.get(3)=="C") {
+                lock.notify();
+            }
+            list.add("A");
+
         }
+
+        });
+        Thread t5 = new Thread(() -> {
+
+                try {
+
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            synchronized (lock) {
+            try {
+
+                lock.wait();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+                if (list.get(4)=="A") {
+                    lock.notify();
+                }
+                list.add("B");
+
+
+
+            }
+
+
+        });
+
+        Thread t6 = new Thread(() -> {
+
+                try {
+                    Thread.sleep(1000);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            synchronized (lock) {
+            try {
+                lock.wait();
+
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+                if (list.get(5)=="B") {
+                    lock.notify();
+                }
+                list.add("C");
+                System.out.println(list);
+
+
+            }
+
+
+        });
+
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t5.start();
+        t6.start();
+        }
+
+
     }
-}
+
