@@ -1,66 +1,67 @@
 package com.company;
 
+import java.util.ArrayList;//библиотеки
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WNALL {
 
 
-    public static void main(String[] args) throws InterruptedException {
-        Object lock = new Object();
-        List<String> list = new CopyOnWriteArrayList<>();
-
-            Thread t1 = new Thread(() -> {
-
+    public static void main(String[] args)  {//а тут интераптед эксепшион особо не нужно
+        AtomicInteger x = new AtomicInteger();//атомарные операции для осуществления многопоточности
+        Object lock = new Object();//объект, на котором будет синхронизация
+        List<String> list = new ArrayList<>(15);//объявление листа в эррэй лист
+        while (x.get() < 15) {//потоки живут пока количество их исполнений не будет равно 15
+            Thread t1 = new Thread(() -> {//объявление потока
 
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1000);//поток останавливается на секунду
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException e) {//исключение на возобновление метода
+                    e.printStackTrace();//говорит запускающему что с кодом в этом  месте
                 }
-                synchronized (lock) {
+                synchronized (lock) {//синхронизация на объекте лок
                     try {
-                        lock.wait();
+                        lock.wait();//после синхронизации на лок ожидает своей участи
 
 
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } catch (InterruptedException e) {//исключение на возобновление метода
+                        e.printStackTrace();//говорит запускающему что с кодом в этом  месте
                     }
-                    if (list.get(1)==null) {
+                    if (list.get(1) == null) {//при выполнении условия равенства поток пробуждается
+                        //затем в лист добавляется элемент
                         lock.notify();
                     }
                     list.add("A");
                 }
 
 
-
-
-
+                x.getAndIncrement();
             });
             Thread t2 = new Thread(() -> {
 
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {//исключение на возобновление метода
+                    e.printStackTrace();
+                }
+
+                synchronized (lock) {//синхронизация на объекте лок
                     try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
+                        lock.wait(); //то что после синхронизации на лок ожидает своей участи
+
+                    } catch (InterruptedException e) {//исключение на возобновление метода
                         e.printStackTrace();
                     }
-
-                synchronized (lock) {
-                    try {
-                        lock.wait();
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (list.get(1)=="A") {
+                    if (list.get(1) == "A") {//при выполнении условия равенства поток пробуждается
+                        //затем в лист добавляется элемент
                         lock.notify();
                     }
                     list.add("B");
 
-
+                    x.getAndIncrement();
                 }
 
 
@@ -68,123 +69,46 @@ public class WNALL {
 
             Thread t3 = new Thread(() -> {
 
-                    try {
-                        Thread.sleep(1000);
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                synchronized (lock) {
                 try {
-                    lock.wait();
+                    Thread.sleep(1000);
 
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException e) {//исключение на возобновление метода
+                    e.printStackTrace();//говорит запускающему что с кодом в этом  месте
                 }
-                    if (list.get(2)=="B") {
-                        lock.notify();
+
+                synchronized (lock) {//синхронизация на объекте лок
+                    try {
+                        lock.wait();//то что после синхронизации на лок ожидает своей участи
+
+
+                    } catch (InterruptedException e) {//исключение на возобновление метода
+                        e.printStackTrace();//говорит запускающему что с кодом в этом  месте
+                    }
+                    if (list.get(2) == "B") {//при выполнении условия равенства поток пробуждается
+                        //затем в лист добавляется элемент
+                        lock.notify();//при выполнении условия равенства поток пробуждается
+                        //затем в лист добавляется элемент
                     }
                     list.add("C");
                     System.out.println(list);
 
 
-
                 }
 
-
+                x.getAndIncrement();//увеличение счётчика на 1 в рамках цикла вайл
             });
-        Thread t4 = new Thread(() -> {
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-        synchronized (lock) {
-            try {
 
 
-                lock.wait();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (list.get(3)=="C") {
-                lock.notify();
-            }
-            list.add("A");
-
-        }
-
-        });
-        Thread t5 = new Thread(() -> {
-
-                try {
-
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            synchronized (lock) {
-            try {
-
-                lock.wait();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-                if (list.get(4)=="A") {
-                    lock.notify();
-                }
-                list.add("B");
-
-
-
-            }
-
-
-        });
-
-        Thread t6 = new Thread(() -> {
-
-                try {
-                    Thread.sleep(1000);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            synchronized (lock) {
-            try {
-                lock.wait();
-
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-                if (list.get(5)=="B") {
-                    lock.notify();
-                }
-                list.add("C");
+            t1.start();//запуск потоков
+            t2.start();
+            t3.start();
+            if(x.get()==15){//если икс равен 15 то его значения переходят в консоль, а цикл завершается вместе с потоками
                 System.out.println(list);
-
-
+                break;
             }
-
-
-        });
-
-        t1.start();
-        t2.start();
-        t3.start();
-        t4.start();
-        t5.start();
-        t6.start();
         }
 
 
     }
+}
 
