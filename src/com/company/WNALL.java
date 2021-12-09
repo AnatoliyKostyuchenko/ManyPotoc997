@@ -7,108 +7,105 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class WNALL {
 
-
+   static String c="C";
+    static Object lock = new Object();//объект, на котором будет синхронизация
     public static void main(String[] args)  {//а тут интераптед эксепшион особо не нужно
-        AtomicInteger x = new AtomicInteger();//атомарные операции для осуществления многопоточности
-        Object lock = new Object();//объект, на котором будет синхронизация
-        List<String> list = new ArrayList<>(15);//объявление листа в эррэй лист
-        while (x.get() < 15) {//потоки живут пока количество их исполнений не будет равно 15
-            Thread t1 = new Thread(() -> {//объявление потока
 
-
-                try {
-                    Thread.sleep(1000);//поток останавливается на секунду
-
-                } catch (InterruptedException e) {//исключение на возобновление метода
-                    e.printStackTrace();//говорит запускающему что с кодом в этом  месте
-                }
-                synchronized (lock) {//синхронизация на объекте лок
-                    try {
-                        lock.wait();//после синхронизации на лок ожидает своей участи
-
-
-                    } catch (InterruptedException e) {//исключение на возобновление метода
-                        e.printStackTrace();//говорит запускающему что с кодом в этом  месте
-                    }
-                    if (list.get(1) == null) {//при выполнении условия равенства поток пробуждается
-                        //затем в лист добавляется элемент
-                        lock.notify();
-                    }
-                    list.add("A");
-                }
-
-
-                x.getAndIncrement();
-            });
-            Thread t2 = new Thread(() -> {
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {//исключение на возобновление метода
-                    e.printStackTrace();
-                }
-
-                synchronized (lock) {//синхронизация на объекте лок
-                    try {
-                        lock.wait(); //то что после синхронизации на лок ожидает своей участи
-
-                    } catch (InterruptedException e) {//исключение на возобновление метода
-                        e.printStackTrace();
-                    }
-                    if (list.get(1) == "A") {//при выполнении условия равенства поток пробуждается
-                        //затем в лист добавляется элемент
-                        lock.notify();
-                    }
-                    list.add("B");
-
-                    x.getAndIncrement();
-                }
-
-
-            });
-
-            Thread t3 = new Thread(() -> {
-
-                try {
-                    Thread.sleep(1000);
-
-                } catch (InterruptedException e) {//исключение на возобновление метода
-                    e.printStackTrace();//говорит запускающему что с кодом в этом  месте
-                }
-
-                synchronized (lock) {//синхронизация на объекте лок
-                    try {
-                        lock.wait();//то что после синхронизации на лок ожидает своей участи
-
-
-                    } catch (InterruptedException e) {//исключение на возобновление метода
-                        e.printStackTrace();//говорит запускающему что с кодом в этом  месте
-                    }
-                    if (list.get(2) == "B") {//при выполнении условия равенства поток пробуждается
-                        //затем в лист добавляется элемент
-                        lock.notify();//при выполнении условия равенства поток пробуждается
-                        //затем в лист добавляется элемент
-                    }
-                    list.add("C");
-                    System.out.println(list);
-
-
-                }
-
-                x.getAndIncrement();//увеличение счётчика на 1 в рамках цикла вайл
-            });
-
-
-            t1.start();//запуск потоков
-            t2.start();
-            t3.start();
-            if(x.get()==15){//если икс равен 15 то его значения переходят в консоль, а цикл завершается вместе с потоками
-                System.out.println(list);
-                break;
+        WNALL wnall = new WNALL();
+        Thread t1 = new Thread(()->wnall.A());
+        Thread t2 = new Thread(()-> {wnall.B();
+        });
+        Thread t3 = new Thread(()-> {
+           wnall.C();
+        });
+        t1.start();
+        t2.start();
+        t3.start();
             }
-        }
 
+
+
+public static void A() {
+    synchronized (lock) {//синхронизация на объекте лок
+        for (int i = 0; i < 5; i++) {
+        while(c!="C") {
+            try {
+                lock.wait();//после синхронизации на лок ожидает своей участи
+            } catch (InterruptedException e) {//исключение на возобновление метода
+                e.printStackTrace();//говорит запускающему что с кодом в этом  месте
+            }
+
+
+
+            }
+
+        }
+        c="A";
+        System.out.print("A");
+
+        lock.notifyAll();
 
     }
 }
+
+
+
+
+
+
+
+      public static void B() {
+          synchronized (lock) {//синхронизация на объекте лок
+              for (int f = 0; f < 5; f++) {
+              while(c!="A") {
+                  try {
+                      lock.wait();
+                  } catch (InterruptedException e) {
+                      e.printStackTrace();
+                  }
+
+
+              }
+
+              }
+              System.out.print("B");
+              c="B";
+              lock.notifyAll();
+
+          }
+      }
+
+
+
+    public static void C()  {
+        synchronized (lock) {//синхронизация на объекте лок
+            for (int g = 0; g < 5; g++) {
+            while(c !="B") {
+
+
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            }
+            c="С";
+            lock.notifyAll();
+            System.out.print("C");
+        }
+    }
+
+
+
+
+    //запуск потоков
+
+
+
+}
+
+
+
 
